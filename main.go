@@ -12,7 +12,7 @@ func main() {
 	fmt.Println("Starting GoGym!")
 
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error: %v\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -25,7 +25,7 @@ func run() error {
 	}
 
 	if err := menu.Loop(os.Args[1]); err != nil {
-		return fmt.Errorf("Error while executing main loop: %v\n", err)
+		return fmt.Errorf("Error while executing main loop: %v \n", err)
 	}
 
 	return nil
