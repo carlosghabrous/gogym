@@ -7,7 +7,7 @@ import (
 
 type MenuChildren map[string]Menuer
 type SingleSection struct {
-	Name        string
+	Id          string
 	Description string
 }
 
@@ -23,31 +23,51 @@ type Exercise struct {
 
 type Menuer interface {
 	String() string
-	Add(menuer *Menuer)
+	Name() string
+	Attach(menuer *Menuer) error
 }
 
 func (ss *SingleSection) String() string {
-	return fmt.Sprintf("Name: %s - Description: %s", ss.Name, ss.Description)
+	return fmt.Sprintf("Name: %s - Description: %s", ss.Id, ss.Description)
 }
 
-func (ss *SingleSection) Add(menuer *Menuer) {
+func (ss *SingleSection) Name() string {
+	return ss.Id
+}
 
+func (ss *SingleSection) Attach(menuer *Menuer) error {
+	panic("single sections are not allowed to have children")
 }
 
 func (s *Section) String() string {
-	return fmt.Sprintf("Name: %s - Description: %s - Children: %s", s.Name, s.Description, s.Children)
+	return fmt.Sprintf("Name: %s - Description: %s - Children: %s", s.Id, s.Description, s.Children)
 }
 
-func (s *Section) Add(menuer *Menuer) {
+func (s *Section) Name() string {
+	return s.Id
+}
 
+func (s *Section) Attach(menuer *Menuer) error {
+	name := (*menuer).Name()
+
+	if _, ok := s.Children[name]; ok {
+		return fmt.Errorf("item %s already exists", name)
+	}
+
+	s.Children[name] = *menuer
+	return nil
 }
 
 func (e *Exercise) String() string {
-	return fmt.Sprintf("Name: %s - Description: %s", e.Name, e.Description)
+	return fmt.Sprintf("Name: %s - Description: %s", e.Id, e.Description)
 }
 
-func (e *Exercise) Add(menuer *Menuer) {
+func (e *Exercise) Name() string {
+	return e.Id
+}
 
+func (e *Exercise) Attach(menuer *Menuer) error {
+	panic("exercises are not allowed to have children")
 }
 
 var topMenu MenuChildren
@@ -104,7 +124,7 @@ func Equal(a, b Menuer) bool {
 }
 
 func areExercisesEqual(a, b *Exercise) bool {
-	return a.Name == b.Name &&
+	return a.Id == b.Id &&
 		a.Description == b.Description
 	//TODO: Compare functions?
 	// &&
@@ -112,11 +132,11 @@ func areExercisesEqual(a, b *Exercise) bool {
 }
 
 func areSingleSectionsEqual(a, b *SingleSection) bool {
-	return a.Name == b.Name &&
+	return a.Id == b.Id &&
 		a.Description == b.Description
 }
 func areSectionsEqual(a, b *Section) bool {
-	return a.Name == b.Name &&
+	return a.Id == b.Id &&
 		a.Description == b.Description
 	//TODO: Compare MenuChildren
 	// &&

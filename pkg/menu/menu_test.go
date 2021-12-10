@@ -7,7 +7,7 @@ import (
 
 func TestAddSingleSectionToMenu(t *testing.T) {
 	singleSectionName := "section 01"
-	ss01 := &SingleSection{Name: singleSectionName, Description: "section01 desc"}
+	ss01 := &SingleSection{Id: singleSectionName, Description: "section01 desc"}
 	Add(singleSectionName, ss01)
 
 	data, err := Get(singleSectionName)
@@ -27,7 +27,7 @@ func TestAddExerciseToMenu(t *testing.T) {
 		fmt.Printf("Do something here with args %s", args)
 		return nil
 	}
-	ex01 := &Exercise{SingleSection{Name: exerciseName, Description: "Ex description"},
+	ex01 := &Exercise{SingleSection{Id: exerciseName, Description: "Ex description"},
 		runner}
 
 	Add(exerciseName, ex01)
@@ -35,7 +35,7 @@ func TestAddExerciseToMenu(t *testing.T) {
 
 func TestAddSectionToMenu(t *testing.T) {
 	sectionName := "section01"
-	s01 := &Section{SingleSection{Name: sectionName, Description: "desc 01"},
+	s01 := &Section{SingleSection{Id: sectionName, Description: "desc 01"},
 		make(MenuChildren)}
 
 	Add(sectionName, s01)
