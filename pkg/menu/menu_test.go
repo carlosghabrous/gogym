@@ -5,27 +5,18 @@ import (
 	"testing"
 )
 
-// exercise01 := &menu.Exercise{Name: "ex01", Description: "ex01 desc", Runner: bluebook.Exercise01}
-// menu.Add(exercise01)
-
-// // Adding a section to the top menu is possible
-
-// // Adding a section with children to the top menu is possible
-// section02 := &menu.Section{Name: "section 02", Description: "section02 desc"}
-// section02.Add(exercise01)
-// menu.Add(section02)
-
 func TestAddSingleSectionToMenu(t *testing.T) {
-	sectionName := "section 01"
-	ss01 := &SingleSection{Name: sectionName, Description: "section01 desc"}
-	Add(sectionName, ss01)
+	singleSectionName := "section 01"
+	ss01 := &SingleSection{Name: singleSectionName, Description: "section01 desc"}
+	Add(singleSectionName, ss01)
 
-	data, err := Get(sectionName)
+	data, err := Get(singleSectionName)
 
 	if err != nil {
-		t.Fatalf("error getting singleSection %s, expected nil", sectionName)
+		t.Fatalf("error getting singleSection %s, expected nil", singleSectionName)
 	}
-	if !Compare(ss01, data) {
+
+	if !Equal(ss01, data) {
 		t.Fatalf("error; got %s, expected %s", data, ss01)
 	}
 }
@@ -53,7 +44,20 @@ func TestAddSectionToMenu(t *testing.T) {
 		t.Fatalf("error getting Section %s, expected nil", sectionName)
 	}
 
-	if !Compare(s01, data) {
+	if !Equal(s01, data) {
 		t.Fatalf("error; got %s, expected %s", data, s01)
 	}
 }
+
+// func TestAddSectionWithExerciseToMenu(t *testing.T) {
+
+// }
+
+// func TestAddSectionSubWithExerciseToMenu(t *testing.T) {
+
+// }
+
+// // // Adding a section with children to the top menu is possible
+// // section02 := &menu.Section{Name: "section 02", Description: "section02 desc"}
+// // section02.Add(exercise01)
+// // menu.Add(section02)

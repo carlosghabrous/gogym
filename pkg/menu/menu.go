@@ -53,7 +53,8 @@ func (e *Exercise) Add(menuer *Menuer) {
 var topMenu MenuChildren
 
 func Add(name string, item Menuer) {
-	if Compare(item, &Section{}) {
+
+	if IsMenuEmpty() {
 		topMenu = make(MenuChildren)
 	}
 
@@ -65,36 +66,61 @@ func Add(name string, item Menuer) {
 }
 
 func Get(name string) (Menuer, error) {
-	return &Section{}, nil
+	var menuer Menuer
+
+	menuer, ok := topMenu[name]
+	if !ok {
+		return menuer, fmt.Errorf("top menu doesn't contain item %s", name)
+	}
+
+	return menuer, nil
 }
 
-func Compare(a, b Menuer) bool {
-	if reflect.TypeOf(a) == reflect.TypeOf(b) {
+func IsMenuEmpty() bool {
+	return topMenu == nil
+}
+
+func Display() {
+
+}
+
+func Equal(a, b Menuer) bool {
+	if reflect.TypeOf(a) != reflect.TypeOf(b) {
+		fmt.Println("different types")
 		return false
 	}
 
 	switch a.(type) {
 	case *Exercise:
-		return compareExercises(a.(*Exercise), b.(*Exercise))
+		return areExercisesEqual(a.(*Exercise), b.(*Exercise))
 
 	case *Section:
-		return compareSections(a.(*Section), b.(*Section))
+		return areSectionsEqual(a.(*Section), b.(*Section))
 
 	case *SingleSection:
-		return compareSingleSections(a.(*SingleSection), b.(*SingleSection))
+		return areSingleSectionsEqual(a.(*SingleSection), b.(*SingleSection))
 	}
 	return false
 }
 
-func compareExercises(a, b *Exercise) bool {
-	return true
+func areExercisesEqual(a, b *Exercise) bool {
+	return a.Name == b.Name &&
+		a.Description == b.Description
+	//TODO: Compare functions?
+	// &&
+	// a.Runner == b.Runner
 }
 
-func compareSingleSections(a, b *SingleSection) bool {
-	return true
+func areSingleSectionsEqual(a, b *SingleSection) bool {
+	return a.Name == b.Name &&
+		a.Description == b.Description
 }
-func compareSections(a, b *Section) bool {
-	return true
+func areSectionsEqual(a, b *Section) bool {
+	return a.Name == b.Name &&
+		a.Description == b.Description
+	//TODO: Compare MenuChildren
+	// &&
+	// a.Children == b.Children
 }
 
 // Implements the main loop for gogym
