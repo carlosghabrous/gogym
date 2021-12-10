@@ -1,6 +1,9 @@
 package menu
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // exercise01 := &menu.Exercise{Name: "ex01", Description: "ex01 desc", Runner: bluebook.Exercise01}
 // menu.Add(exercise01)
@@ -29,8 +32,12 @@ func TestAddSingleSectionToMenu(t *testing.T) {
 
 func TestAddExerciseToMenu(t *testing.T) {
 	exerciseName := "ex01"
+	runner := func(args ...interface{}) error {
+		fmt.Printf("Do something here with args %s", args)
+		return nil
+	}
 	ex01 := &Exercise{SingleSection{Name: exerciseName, Description: "Ex description"},
-		func(a, b int) error { return nil }}
+		runner}
 
 	Add(exerciseName, ex01)
 }
