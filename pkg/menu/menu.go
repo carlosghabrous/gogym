@@ -1,32 +1,104 @@
 package menu
 
 import (
-	"bufio"
 	"fmt"
-	"path"
+	"reflect"
 )
 
-// Implements the main loop for gogym
-func Loop(root string) error {
+type MenuChildren map[string]Menuer
+type SingleSection struct {
+	Name        string
+	Description string
+}
 
-	var userOption, whereUserIs string = "", root
-	var reader *bufio.Reader
+type Section struct {
+	SingleSection
+	Children MenuChildren
+}
 
-	for {
-		fmt.Printf("%s %s%s\n", "You are in", whereUserIs, ". The menu is:")
-		retrieveMenu(userOption)
-		userOption, _ = reader.ReadString('\n')
-		whereUserIs = path.Join(whereUserIs, getUserLocation(userOption))
+type Exercise struct {
+	SingleSection
+	Runner func(args ...interface{}) error
+}
+
+type Menuer interface {
+	String() string
+	Add(menuer *Menuer)
+}
+
+func (ss *SingleSection) String() string {
+	return fmt.Sprintf("Name: %s - Description: %s", ss.Name, ss.Description)
+}
+
+func (ss *SingleSection) Add(menuer *Menuer) {
+
+}
+
+func (s *Section) String() string {
+	return fmt.Sprintf("Name: %s - Description: %s - Children: %s", s.Name, s.Description, s.Children)
+}
+
+func (s *Section) Add(menuer *Menuer) {
+
+}
+
+func (e *Exercise) String() string {
+	return fmt.Sprintf("Name: %s - Description: %s", e.Name, e.Description)
+}
+
+func (e *Exercise) Add(menuer *Menuer) {
+
+}
+
+var topMenu MenuChildren
+
+func Add(name string, item Menuer) {
+	if Compare(item, &Section{}) {
+		topMenu = make(MenuChildren)
 	}
 
+	if _, ok := topMenu[name]; ok {
+		panic("item already in menu")
+	}
+
+	topMenu[name] = item
 }
 
-// Reads the corresponding directory looking for its menu
-func retrieveMenu(option string) {
-
+func Get(name string) (Menuer, error) {
+	return &Section{}, nil
 }
 
-// Gets the user's current location
-func getUserLocation(option string) string {
-	return ""
+func Compare(a, b Menuer) bool {
+	if reflect.TypeOf(a) == reflect.TypeOf(b) {
+		return false
+	}
+
+	switch a.(type) {
+	case *Exercise:
+		return compareExercises(a.(*Exercise), b.(*Exercise))
+
+	case *Section:
+		return compareSections(a.(*Section), b.(*Section))
+
+	case *SingleSection:
+		return compareSingleSections(a.(*SingleSection), b.(*SingleSection))
+	}
+	return false
+}
+
+func compareExercises(a, b *Exercise) bool {
+	return true
+}
+
+func compareSingleSections(a, b *SingleSection) bool {
+	return true
+}
+func compareSections(a, b *Section) bool {
+	return true
+}
+
+// Implements the main loop for gogym
+func Loop() error {
+	fmt.Println()
+	return nil
 }
