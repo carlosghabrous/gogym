@@ -5,6 +5,12 @@ import (
 	"testing"
 )
 
+func TestEmptyMenu(t *testing.T) {
+	if data, err := Get("something"); err == nil {
+		t.Fatalf("expected error, got %s", data)
+	}
+}
+
 func TestAddSingleSectionToMenu(t *testing.T) {
 	singleSectionName := "section 01"
 	ss01 := &SingleSection{Id: singleSectionName, Description: "section01 desc"}
