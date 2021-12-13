@@ -24,7 +24,12 @@ type Exercise struct {
 type Menuer interface {
 	String() string
 	Name() string
-	Attach(menuer *Menuer) error
+	Attach(menuer Menuer) error
+}
+
+type Options struct {
+	Name string
+	From Menuer
 }
 
 func (ss *SingleSection) String() string {
@@ -35,7 +40,7 @@ func (ss *SingleSection) Name() string {
 	return ss.Id
 }
 
-func (ss *SingleSection) Attach(menuer *Menuer) error {
+func (ss *SingleSection) Attach(menuer Menuer) error {
 	panic("single sections are not allowed to have children")
 }
 
@@ -47,14 +52,14 @@ func (s *Section) Name() string {
 	return s.Id
 }
 
-func (s *Section) Attach(menuer *Menuer) error {
-	name := (*menuer).Name()
+func (s *Section) Attach(menuer Menuer) error {
+	name := menuer.Name()
 
 	if _, ok := s.Children[name]; ok {
 		return fmt.Errorf("item %s already exists", name)
 	}
 
-	s.Children[name] = *menuer
+	s.Children[name] = menuer
 	return nil
 }
 
@@ -66,38 +71,52 @@ func (e *Exercise) Name() string {
 	return e.Id
 }
 
-func (e *Exercise) Attach(menuer *Menuer) error {
+func (e *Exercise) Attach(menuer Menuer) error {
 	panic("exercises are not allowed to have children")
 }
 
-var topMenu MenuChildren
+var topMenu Section
 
 func Add(name string, item Menuer) {
 
 	if IsMenuEmpty() {
-		topMenu = make(MenuChildren)
+		topMenu.Id = "GoGym"
+		topMenu.Description = "Exercising in Go"
+		topMenu.Children = make(MenuChildren)
 	}
 
-	if _, ok := topMenu[name]; ok {
+	if _, ok := topMenu.Children[name]; ok {
 		panic("item already in menu")
 	}
 
-	topMenu[name] = item
+	topMenu.Children[name] = item
 }
 
-func Get(name string) (Menuer, error) {
-	var menuer Menuer
+func Get(options *Options) (Menuer, error) {
+	var returnMenuer, fromMenuer Menuer
 
-	menuer, ok := topMenu[name]
-	if !ok {
-		return menuer, fmt.Errorf("top menu doesn't contain item %s", name)
+	if options.From == nil {
+		fromMenuer = &topMenu
+
+	} else {
+		fromMenuer = options.From
 	}
 
-	return menuer, nil
+	fromSection, ok := fromMenuer.(*Section)
+	if !ok {
+		fmt.Errorf("only Section(s) contain children elements")
+	}
+
+	returnMenuer, ok = fromSection.Children[options.Name]
+	if !ok {
+		return returnMenuer, fmt.Errorf("top menu doesn't contain item %s", options.Name)
+	}
+
+	return returnMenuer, nil
 }
 
 func IsMenuEmpty() bool {
-	return topMenu == nil
+	return topMenu.Children == nil
 }
 
 func Display() {
