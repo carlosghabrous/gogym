@@ -3,10 +3,20 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/carlosghabrous/gogym/pkg/gym/bluebook"
 	"github.com/carlosghabrous/gogym/pkg/menu"
 )
+
+//TODO: Default top level item to avoid nil fields etc
+//TOOD: Interface to add stuff?
+func init() {
+	e01 := &menu.Exercise{menu.SingleSection{Id: "1", Description: "Chapter01, Ex01"}, bluebook.Exercise01}
+	blue01 := &menu.Section{menu.SingleSection{Id: "Chapter01", Description: "Blue book's chapter 01"}, nil}
+	blue01.Attach(e01)
+
+	menu.Add("blue book", blue01)
+}
 
 func main() {
 	fmt.Println("Starting GoGym!")
@@ -20,12 +30,8 @@ func main() {
 }
 
 func run() error {
-	if len(os.Args[1:]) != 1 {
-		return fmt.Errorf("%s %s", "Expected one input argument. Got ", strings.Join(os.Args[1:], ","))
-	}
-
-	if err := menu.Loop(os.Args[1]); err != nil {
-		return fmt.Errorf("Error while executing main loop: %v \n", err)
+	if err := menu.Loop(); err != nil {
+		return fmt.Errorf("error while executing main loop: %v", err)
 	}
 
 	return nil
