@@ -53,6 +53,10 @@ func (s *Section) Name() string {
 }
 
 func (s *Section) Attach(menuer Menuer) error {
+	if s.Children == nil {
+		s.Children = make(MenuChildren)
+	}
+
 	name := menuer.Name()
 
 	if _, ok := s.Children[name]; ok {
@@ -120,7 +124,7 @@ func IsMenuEmpty() bool {
 }
 
 func Display() {
-
+	fmt.Printf("topMenu: %v\n", topMenu)
 }
 
 func Equal(a, b Menuer) bool {
@@ -164,6 +168,6 @@ func areSectionsEqual(a, b *Section) bool {
 
 // Implements the main loop for gogym
 func Loop() error {
-	fmt.Println()
+	Display()
 	return nil
 }
