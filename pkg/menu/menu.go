@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // offspring contains the children for a menu item
@@ -100,6 +101,15 @@ func (e *Exercise) Name() string {
 
 func (e *Exercise) Desc() string {
 	return e.MD.Description
+}
+
+func (o *offspring) String() string {
+	result := make([]string, 0)
+	for _, v := range *o {
+		result = append(result, fmt.Sprintf("<Name: %s> <Description: %s>", v.Name(), v.Desc()))
+	}
+
+	return strings.Join(result, "\n")
 }
 
 var topMenu Section
@@ -252,7 +262,6 @@ func display(menu *numberedMenu, options *buildOptions) {
 	}
 }
 
-//TODO: Change return type to numberedMenu or similar
 func buildMenu(options *buildOptions) *numberedMenu {
 	var temp = make(numberedMenu)
 	var navigator Section
