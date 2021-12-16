@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
-const exitOptionName = "Exit"
+const (
+	exitOptionName  = "Exit"
+	exitOptionValue = 0
+)
 
 // offspring contains the children for a menu item
 type offspring map[string]nameDescriptioner
@@ -156,8 +159,7 @@ func Loop() error {
 			continue
 		}
 
-		//TODO: option 0 should be a constant or something
-		if option == 0 {
+		if option == exitOptionValue {
 			fmt.Println("Bye!")
 			break
 		}
@@ -287,7 +289,7 @@ func buildMenu(options *buildOptions) *numberedMenu {
 	i := 1
 	for k := range navigator.Children {
 		if k == exitOptionName {
-			temp[0] = k
+			temp[exitOptionValue] = k
 
 		} else {
 			temp[i] = k
