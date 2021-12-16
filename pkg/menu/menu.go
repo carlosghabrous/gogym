@@ -5,6 +5,7 @@ import (
 	"reflect"
 )
 
+// TODO: initialize to zero types. When? User defined types as well?
 // TODO: implement string method for this type
 // Offspring contains the children for a menu item
 type Offspring map[string]NameDescriptioner
@@ -17,13 +18,13 @@ type MetaData struct {
 
 // Section contains metadata and children bound to it
 type Section struct {
-	MetaData
+	MD       MetaData
 	Children Offspring
 }
 
 // Exercise contains metadata and a function that implements the exercise's code
 type Exercise struct {
-	MetaData
+	MD     MetaData
 	Runner func(args ...interface{}) error
 }
 
@@ -59,16 +60,16 @@ func (ss *MetaData) Desc() string {
 
 // String returns the string representation of a Section
 func (s *Section) String() string {
-	return fmt.Sprintf("<Name: %s> <Description: %s> <Children: %s>", s.Id, s.Description, s.Children)
+	return fmt.Sprintf("<Name: %s> <Description: %s> <Children: %s>", s.MD.Id, s.MD.Description, s.Children)
 }
 
 // Name returns the Section's name
 func (s *Section) Name() string {
-	return s.Id
+	return s.MD.Id
 }
 
 func (s *Section) Desc() string {
-	return s.Description
+	return s.MD.Description
 }
 
 // Attach binds a MetaData, Section or Exercise to a Section
@@ -89,16 +90,16 @@ func (s *Section) Attach(item NameDescriptioner) error {
 
 // String returns the string representation of as Exercise
 func (e *Exercise) String() string {
-	return fmt.Sprintf("%s", e.MetaData)
+	return fmt.Sprintf("%s", e.MD)
 }
 
 // Name returns the Exercise's name
 func (e *Exercise) Name() string {
-	return e.Id
+	return e.MD.Id
 }
 
 func (e *Exercise) Desc() string {
-	return e.Description
+	return e.MD.Description
 }
 
 var topMenu Section
@@ -107,8 +108,8 @@ var topMenu Section
 func Add(name string, item NameDescriptioner) {
 
 	if isMenuEmpty() {
-		topMenu.Id = "GoGym"
-		topMenu.Description = "Exercising in Go"
+		topMenu.MD.Id = "GoGym"
+		topMenu.MD.Description = "Exercising in Go"
 		topMenu.Children = make(Offspring)
 	}
 
@@ -209,8 +210,8 @@ func equal(a, b NameDescriptioner) bool {
 
 // areExercisesEqual compares to variables of type Exercise
 func areExercisesEqual(a, b *Exercise) bool {
-	return a.Id == b.Id &&
-		a.Description == b.Description
+	return a.MD.Id == b.MD.Id &&
+		a.MD.Description == b.MD.Description
 	//TODO: Compare functions?
 	// &&
 	// a.Runner == b.Runner
@@ -224,8 +225,8 @@ func areSingleSectionsEqual(a, b *MetaData) bool {
 
 // areSectionsEqual compares to variables of type Section
 func areSectionsEqual(a, b *Section) bool {
-	return a.Id == b.Id &&
-		a.Description == b.Description
+	return a.MD.Id == b.MD.Id &&
+		a.MD.Description == b.MD.Description
 	//TODO: Compare Offspring
 	// &&
 	// a.Children == b.Children
