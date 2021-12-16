@@ -19,18 +19,18 @@ func TestEmptyMenu(t *testing.T) {
 	}
 }
 
-func TestAddSingleSectionToMenu(t *testing.T) {
-	singleSectionName := "section 01"
-	ss01 := &SingleSection{Id: singleSectionName, Description: "section01 desc"}
-	Add(singleSectionName, ss01)
+func TestAddMetaDataToMenu(t *testing.T) {
+	MetaDataName := "section 01"
+	ss01 := &MetaData{Id: MetaDataName, Description: "section01 desc"}
+	Add(MetaDataName, ss01)
 
-	data, err := Get(&Options{Name: singleSectionName})
+	data, err := Get(&Options{Name: MetaDataName})
 
 	if err != nil {
-		t.Fatalf("error getting singleSection %s, expected nil", singleSectionName)
+		t.Fatalf("error getting MetaData %s, expected nil", MetaDataName)
 	}
 
-	if !Equal(ss01, data) {
+	if !equal(ss01, data) {
 		t.Fatalf("error; got %s, expected %s", data, ss01)
 	}
 
@@ -43,7 +43,7 @@ func TestAddExerciseToMenu(t *testing.T) {
 		fmt.Printf("Do something here with args %s", args)
 		return nil
 	}
-	ex01 := &Exercise{SingleSection{Id: exerciseName, Description: "Ex description"},
+	ex01 := &Exercise{MetaData{Id: exerciseName, Description: "Ex description"},
 		runner}
 
 	Add(exerciseName, ex01)
@@ -51,10 +51,10 @@ func TestAddExerciseToMenu(t *testing.T) {
 	data, err := Get(&Options{Name: exerciseName})
 
 	if err != nil {
-		t.Fatalf("error getting singleSection %s, expected nil", exerciseName)
+		t.Fatalf("error getting MetaData %s, expected nil", exerciseName)
 	}
 
-	if !Equal(ex01, data) {
+	if !equal(ex01, data) {
 		t.Fatalf("error; got %s, expected %s", data, ex01)
 	}
 	cleanUp(t)
@@ -62,7 +62,7 @@ func TestAddExerciseToMenu(t *testing.T) {
 
 func TestAddSectionToMenu(t *testing.T) {
 	sectionName := "section01"
-	s01 := &Section{SingleSection{Id: sectionName, Description: "desc 01"},
+	s01 := &Section{MetaData{Id: sectionName, Description: "desc 01"},
 		make(MenuChildren)}
 
 	Add(sectionName, s01)
@@ -71,7 +71,7 @@ func TestAddSectionToMenu(t *testing.T) {
 		t.Fatalf("error getting Section %s, expected nil", sectionName)
 	}
 
-	if !Equal(s01, data) {
+	if !equal(s01, data) {
 		t.Fatalf("error; got %s, expected %s", data, s01)
 	}
 	cleanUp(t)
@@ -86,9 +86,9 @@ func TestAddSectionWithExerciseToMenu(t *testing.T) {
 		return nil
 	}
 
-	exercise01 := &Exercise{SingleSection{Id: "1", Description: "First exercise"}, runner}
+	exercise01 := &Exercise{MetaData{Id: "1", Description: "First exercise"}, runner}
 	sectionName := "section01"
-	s01 := &Section{SingleSection{Id: sectionName, Description: "section 01"},
+	s01 := &Section{MetaData{Id: sectionName, Description: "section 01"},
 		make(MenuChildren)}
 	s01.Attach(exercise01)
 
@@ -104,7 +104,7 @@ func TestAddSectionWithExerciseToMenu(t *testing.T) {
 		t.Fatalf("exercise %s not in section %s", "1", sectionName)
 	}
 
-	if !Equal(e, exercise01) {
+	if !equal(e, exercise01) {
 		t.Fatalf("error; got %s, expected %s", e, exercise01)
 	}
 
@@ -120,13 +120,13 @@ func TestAddNestedSectionsWithExerciseToMenu(t *testing.T) {
 		return nil
 	}
 
-	exercise01 := &Exercise{SingleSection{Id: "1", Description: "First exercise"}, runner}
+	exercise01 := &Exercise{MetaData{Id: "1", Description: "First exercise"}, runner}
 	sectionName := "subsection 01"
-	ss01 := &Section{SingleSection{Id: sectionName, Description: "subsection 01"},
+	ss01 := &Section{MetaData{Id: sectionName, Description: "subsection 01"},
 		make(MenuChildren)}
 	ss01.Attach(exercise01)
 
-	s01 := &Section{SingleSection{Id: "Main section", Description: "main section"},
+	s01 := &Section{MetaData{Id: "Main section", Description: "main section"},
 		make(MenuChildren)}
 	s01.Attach(ss01)
 
