@@ -193,7 +193,7 @@ func get(options *options) (nameDescriptioner, error) {
 
 	fromSection, ok := fromMenuer.(*Section)
 	if !ok {
-		fmt.Errorf("only Section(s) contain children elements")
+		return nil, fmt.Errorf("%s", "only Section(s) contain children elements")
 	}
 
 	returnMenuer, ok = fromSection.Children[options.name]
