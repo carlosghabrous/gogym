@@ -5,10 +5,9 @@ import (
 	"reflect"
 )
 
-// Offspring
-// TODO: change its name
 // TODO: implement string method for this type
-type Offspring map[string]Menuer
+// Offspring contains the children for a menu item
+type Offspring map[string]MenuItemer
 
 // MetaData contains the minimum data for a Section or Exercise
 type MetaData struct {
@@ -28,20 +27,23 @@ type Exercise struct {
 	Runner func(args ...interface{}) error
 }
 
-// Menuer is the interface related to the Offspring type
-// TODO: Change its name
-type Menuer interface {
-	String() string
-	Name() string
-	Desc() string
-	Attach(menuer Menuer) error
+type Attacher interface {
+	Attach(menuer MenuItemer) error
 }
 
-// Options is used as the argument type for the Get function,
+// TODO: Change its name
+// MenuItemer is the interface implemented by the types MetaData, Section y Exercise
+type MenuItemer interface {
+	Name() string
+	Desc() string
+	Attacher
+}
+
+// Options is used as the argument type for the get function,
 // since the From argument can be optional
 type Options struct {
 	Name string
-	From Menuer
+	From MenuItemer
 }
 
 // String returns the string representation of a MetaData
@@ -59,7 +61,7 @@ func (ss *MetaData) Desc() string {
 }
 
 // Attach doesn't work on SingleSections
-func (ss *MetaData) Attach(menuer Menuer) error {
+func (ss *MetaData) Attach(menuer MenuItemer) error {
 	panic("single sections are not allowed to have children")
 }
 
@@ -78,7 +80,7 @@ func (s *Section) Desc() string {
 }
 
 // Attach binds a MetaData, Section or Exercise to a Section
-func (s *Section) Attach(menuer Menuer) error {
+func (s *Section) Attach(menuer MenuItemer) error {
 	if s.Children == nil {
 		s.Children = make(Offspring)
 	}
@@ -108,14 +110,14 @@ func (e *Exercise) Desc() string {
 }
 
 // Attach doesn't work on Exercises
-func (e *Exercise) Attach(menuer Menuer) error {
+func (e *Exercise) Attach(menuer MenuItemer) error {
 	panic("exercises are not allowed to have children")
 }
 
 var topMenu Section
 
-// Add adds an item of name 'name' to another item of type Menuer
-func Add(name string, item Menuer) {
+// Add adds an item of name 'name' to another item of type MenuItemer
+func Add(name string, item MenuItemer) {
 
 	if isMenuEmpty() {
 		topMenu.Id = "GoGym"
@@ -130,9 +132,9 @@ func Add(name string, item Menuer) {
 	topMenu.Children[name] = item
 }
 
-// Get returns an element of type Menuer that has already been added to the menu, or error if the item is not found
-func Get(options *Options) (Menuer, error) {
-	var returnMenuer, fromMenuer Menuer
+// get returns an element of type MenuItemer that has already been added to the menu, or error if the item is not found
+func get(options *Options) (MenuItemer, error) {
+	var returnMenuer, fromMenuer MenuItemer
 
 	if options.From == nil {
 		fromMenuer = &topMenu
@@ -159,8 +161,8 @@ func isMenuEmpty() bool {
 	return topMenu.Children == nil
 }
 
-// equal returns true if two variables of the Menuer interface are equal, false otherwise
-func equal(a, b Menuer) bool {
+// equal returns true if two variables of the MenuItemer interface are equal, false otherwise
+func equal(a, b MenuItemer) bool {
 	if reflect.TypeOf(a) != reflect.TypeOf(b) {
 		fmt.Println("different types")
 		return false
@@ -232,7 +234,7 @@ func Loop() error {
 			break
 		}
 
-		//TODO: resolve choosen Menuer underlaying type and build another menu or run function
+		//TODO: resolve choosen MenuItemer underlaying type and build another menu or run function
 
 	}
 

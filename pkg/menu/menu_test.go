@@ -14,7 +14,7 @@ func cleanUp(t *testing.T) {
 }
 
 func TestEmptyMenu(t *testing.T) {
-	if data, err := Get(&Options{Name: "something"}); err == nil {
+	if data, err := get(&Options{Name: "something"}); err == nil {
 		t.Fatalf("expected error, got %s", data)
 	}
 }
@@ -24,7 +24,7 @@ func TestAddMetaDataToMenu(t *testing.T) {
 	ss01 := &MetaData{Id: MetaDataName, Description: "section01 desc"}
 	Add(MetaDataName, ss01)
 
-	data, err := Get(&Options{Name: MetaDataName})
+	data, err := get(&Options{Name: MetaDataName})
 
 	if err != nil {
 		t.Fatalf("error getting MetaData %s, expected nil", MetaDataName)
@@ -48,7 +48,7 @@ func TestAddExerciseToMenu(t *testing.T) {
 
 	Add(exerciseName, ex01)
 
-	data, err := Get(&Options{Name: exerciseName})
+	data, err := get(&Options{Name: exerciseName})
 
 	if err != nil {
 		t.Fatalf("error getting MetaData %s, expected nil", exerciseName)
@@ -66,7 +66,7 @@ func TestAddSectionToMenu(t *testing.T) {
 		make(Offspring)}
 
 	Add(sectionName, s01)
-	data, err := Get(&Options{Name: sectionName})
+	data, err := get(&Options{Name: sectionName})
 	if err != nil {
 		t.Fatalf("error getting Section %s, expected nil", sectionName)
 	}
@@ -94,12 +94,12 @@ func TestAddSectionWithExerciseToMenu(t *testing.T) {
 
 	Add(sectionName, s01)
 
-	s, err := Get(&Options{Name: sectionName})
+	s, err := get(&Options{Name: sectionName})
 	if err != nil {
 		t.Fatalf("section %s not found in top menu", sectionName)
 	}
 
-	e, err := Get(&Options{Name: "1", From: s})
+	e, err := get(&Options{Name: "1", From: s})
 	if err != nil {
 		t.Fatalf("exercise %s not in section %s", "1", sectionName)
 	}
@@ -132,7 +132,7 @@ func TestAddNestedSectionsWithExerciseToMenu(t *testing.T) {
 
 	Add("Main section", s01)
 
-	ms, err := Get(&Options{Name: "Main section"})
+	ms, err := get(&Options{Name: "Main section"})
 	if err != nil {
 		t.Fatalf("section %s not in top menu (%s)", ms, err)
 	}
