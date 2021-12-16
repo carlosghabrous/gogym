@@ -8,14 +8,18 @@ import (
 	"github.com/carlosghabrous/gogym/pkg/menu"
 )
 
-//TODO: Default top level item to avoid nil fields etc
-//TOOD: Interface to add stuff?
 func init() {
 	e01 := &menu.Exercise{menu.SingleSection{Id: "1", Description: "Chapter01, Ex01"}, bluebook.Exercise01}
+	e02 := &menu.Exercise{menu.SingleSection{Id: "2", Description: "Chapter01, Ex02"}, bluebook.Exercise02}
 	blue01 := &menu.Section{menu.SingleSection{Id: "Chapter01", Description: "Blue book's chapter 01"}, nil}
-	blue01.Attach(e01)
 
-	menu.Add("blue book", blue01)
+	blue01.Attach(e01)
+	blue01.Attach(e02)
+
+	blueBook := &menu.Section{menu.SingleSection{Id: "Go's blue book", Description: "Blue book's exercises"}, nil}
+	blueBook.Attach(blue01)
+
+	menu.Add("Go's blue book", blueBook)
 }
 
 func main() {
