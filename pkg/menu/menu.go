@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const exitOptionName = "Exit"
+
 // offspring contains the children for a menu item
 type offspring map[string]nameDescriptioner
 
@@ -121,6 +123,7 @@ func Add(name string, item nameDescriptioner) {
 		topMenu.MD.Id = "GoGym"
 		topMenu.MD.Description = "Exercising in Go"
 		topMenu.Children = make(offspring)
+		addExitOption()
 	}
 
 	if _, ok := topMenu.Children[name]; ok {
@@ -139,11 +142,11 @@ func Loop() error {
 	for {
 		tempMenu = buildMenu(&buildOps)
 		display(tempMenu, &buildOps)
-		fmt.Println("Select an option from the menu...")
+		fmt.Println("Select an option from the menu")
 
 		_, err := fmt.Scanf("%d", &option)
 		if err != nil {
-			fmt.Println("Something went wrong! Try again...")
+			fmt.Println("Something went wrong! Try again!")
 			continue
 		}
 
@@ -168,6 +171,10 @@ func Loop() error {
 
 // options is used as the argument type for the get function,
 // since the from argument can be optional
+func addExitOption() {
+	topMenu.Children[exitOptionName] = &Section{MD: MetaData{Id: exitOptionName, Description: "Exit GoGym"}}
+}
+
 type options struct {
 	name string
 	from nameDescriptioner
@@ -262,7 +269,7 @@ func display(menu *numberedMenu, options *buildOptions) {
 	}
 
 	for k, v := range *menu {
-		fmt.Printf("%d.%20s%20s\n", k, v, navigator.Children[v].Desc())
+		fmt.Printf("%d.%20s%30s\n", k, v, navigator.Children[v].Desc())
 	}
 }
 
@@ -279,11 +286,14 @@ func buildMenu(options *buildOptions) *numberedMenu {
 
 	i := 1
 	for k := range navigator.Children {
-		temp[i] = k
-		i++
-	}
+		if k == exitOptionName {
+			temp[0] = k
 
-	// temp[i] = "Exit"
+		} else {
+			temp[i] = k
+			i++
+		}
+	}
 
 	return &temp
 }
@@ -294,6 +304,6 @@ func getValidRange(menu *numberedMenu) (min, max int) {
 		return 0, 0
 	}
 
-	return 1, size
+	return 0, size
 
 }
