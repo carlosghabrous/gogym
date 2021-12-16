@@ -5,10 +5,10 @@ import (
 	"reflect"
 )
 
-// MenuChildren
+// Offspring
 // TODO: change its name
 // TODO: implement string method for this type
-type MenuChildren map[string]Menuer
+type Offspring map[string]Menuer
 
 // MetaData contains the minimum data for a Section or Exercise
 type MetaData struct {
@@ -19,7 +19,7 @@ type MetaData struct {
 // Section contains metadata and children bound to it
 type Section struct {
 	MetaData
-	Children MenuChildren
+	Children Offspring
 }
 
 // Exercise contains metadata and a function that implements the exercise's code
@@ -28,7 +28,7 @@ type Exercise struct {
 	Runner func(args ...interface{}) error
 }
 
-// Menuer is the interface related to the MenuChildren type
+// Menuer is the interface related to the Offspring type
 // TODO: Change its name
 type Menuer interface {
 	String() string
@@ -80,7 +80,7 @@ func (s *Section) Desc() string {
 // Attach binds a MetaData, Section or Exercise to a Section
 func (s *Section) Attach(menuer Menuer) error {
 	if s.Children == nil {
-		s.Children = make(MenuChildren)
+		s.Children = make(Offspring)
 	}
 
 	name := menuer.Name()
@@ -120,7 +120,7 @@ func Add(name string, item Menuer) {
 	if isMenuEmpty() {
 		topMenu.Id = "GoGym"
 		topMenu.Description = "Exercising in Go"
-		topMenu.Children = make(MenuChildren)
+		topMenu.Children = make(Offspring)
 	}
 
 	if _, ok := topMenu.Children[name]; ok {
@@ -198,7 +198,7 @@ func areSingleSectionsEqual(a, b *MetaData) bool {
 func areSectionsEqual(a, b *Section) bool {
 	return a.Id == b.Id &&
 		a.Description == b.Description
-	//TODO: Compare MenuChildren
+	//TODO: Compare Offspring
 	// &&
 	// a.Children == b.Children
 }

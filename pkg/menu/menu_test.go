@@ -63,7 +63,7 @@ func TestAddExerciseToMenu(t *testing.T) {
 func TestAddSectionToMenu(t *testing.T) {
 	sectionName := "section01"
 	s01 := &Section{MetaData{Id: sectionName, Description: "desc 01"},
-		make(MenuChildren)}
+		make(Offspring)}
 
 	Add(sectionName, s01)
 	data, err := Get(&Options{Name: sectionName})
@@ -89,7 +89,7 @@ func TestAddSectionWithExerciseToMenu(t *testing.T) {
 	exercise01 := &Exercise{MetaData{Id: "1", Description: "First exercise"}, runner}
 	sectionName := "section01"
 	s01 := &Section{MetaData{Id: sectionName, Description: "section 01"},
-		make(MenuChildren)}
+		make(Offspring)}
 	s01.Attach(exercise01)
 
 	Add(sectionName, s01)
@@ -123,11 +123,11 @@ func TestAddNestedSectionsWithExerciseToMenu(t *testing.T) {
 	exercise01 := &Exercise{MetaData{Id: "1", Description: "First exercise"}, runner}
 	sectionName := "subsection 01"
 	ss01 := &Section{MetaData{Id: sectionName, Description: "subsection 01"},
-		make(MenuChildren)}
+		make(Offspring)}
 	ss01.Attach(exercise01)
 
 	s01 := &Section{MetaData{Id: "Main section", Description: "main section"},
-		make(MenuChildren)}
+		make(Offspring)}
 	s01.Attach(ss01)
 
 	Add("Main section", s01)
