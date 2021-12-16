@@ -7,7 +7,7 @@ import (
 
 // TODO: implement string method for this type
 // Offspring contains the children for a menu item
-type Offspring map[string]MenuItemer
+type Offspring map[string]NameDescriptioner
 
 // MetaData contains the minimum data for a Section or Exercise
 type MetaData struct {
@@ -47,7 +47,7 @@ type MenuItemer interface {
 // since the From argument can be optional
 type Options struct {
 	Name string
-	From MenuItemer
+	From NameDescriptioner
 }
 
 // String returns the string representation of a MetaData
@@ -84,18 +84,18 @@ func (s *Section) Desc() string {
 }
 
 // Attach binds a MetaData, Section or Exercise to a Section
-func (s *Section) Attach(menuer MenuItemer) error {
+func (s *Section) Attach(item NameDescriptioner) error {
 	if s.Children == nil {
 		s.Children = make(Offspring)
 	}
 
-	name := menuer.Name()
+	name := item.Name()
 
 	if _, ok := s.Children[name]; ok {
 		return fmt.Errorf("item %s already exists", name)
 	}
 
-	s.Children[name] = menuer
+	s.Children[name] = item
 	return nil
 }
 
@@ -114,14 +114,14 @@ func (e *Exercise) Desc() string {
 }
 
 // Attach doesn't work on Exercises
-func (e *Exercise) Attach(menuer MenuItemer) error {
-	panic("exercises are not allowed to have children")
-}
+// func (e *Exercise) Attach(menuer MenuItemer) error {
+// 	panic("exercises are not allowed to have children")
+// }
 
 var topMenu Section
 
 // Add adds an item of name 'name' to another item of type MenuItemer
-func Add(name string, item MenuItemer) {
+func Add(name string, item NameDescriptioner) {
 
 	if isMenuEmpty() {
 		topMenu.Id = "GoGym"
@@ -169,8 +169,8 @@ func Loop() error {
 }
 
 // get is a helper that returns an element of type MenuItemer that has already been added to the menu, or error if the item is not found
-func get(options *Options) (MenuItemer, error) {
-	var returnMenuer, fromMenuer MenuItemer
+func get(options *Options) (NameDescriptioner, error) {
+	var returnMenuer, fromMenuer NameDescriptioner
 
 	if options.From == nil {
 		fromMenuer = &topMenu
