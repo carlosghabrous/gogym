@@ -139,13 +139,17 @@ func Loop() error {
 	for {
 		tempMenu = buildMenu(&buildOps)
 		display(tempMenu, &buildOps)
-		fmt.Println("select an option from the menu...")
-		i, err := fmt.Scanf("%d", &option)
+		fmt.Println("Select an option from the menu...")
 
-		fmt.Printf("%d, %v\n", i, err)
+		_, err := fmt.Scanf("%d", &option)
+		if err != nil {
+			fmt.Println("Something went wrong! Try again...")
+			continue
+		}
+
 		min, max = getValidRange(tempMenu)
 		if option < min || option > max {
-			fmt.Printf("option not within valid range (%d - %d). Try again!\n", min, max)
+			fmt.Printf("Option not within valid range (%d - %d). Try again!\n", min, max)
 			continue
 		}
 
@@ -279,7 +283,7 @@ func buildMenu(options *buildOptions) *numberedMenu {
 		i++
 	}
 
-	temp[i] = "Exit"
+	// temp[i] = "Exit"
 
 	return &temp
 }
