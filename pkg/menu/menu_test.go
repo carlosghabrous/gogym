@@ -44,8 +44,7 @@ func TestAddExerciseToMenu(t *testing.T) {
 
 func TestAddSectionToMenu(t *testing.T) {
 	sectionName := "section01"
-	s01 := &Section{MetaData{Id: sectionName, Description: "desc 01"},
-		make(Offspring)}
+	s01 := &Section{MD: MetaData{Id: sectionName, Description: "desc 01"}}
 
 	Add(sectionName, s01)
 	data, err := get(&options{name: sectionName})
