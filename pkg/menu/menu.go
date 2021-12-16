@@ -126,7 +126,6 @@ func Add(name string, item nameDescriptioner) {
 		topMenu.MD.Id = "GoGym"
 		topMenu.MD.Description = "Exercising in Go"
 		topMenu.Children = make(offspring)
-		addExitOption()
 	}
 
 	if _, ok := topMenu.Children[name]; ok {
@@ -143,8 +142,10 @@ func Loop() error {
 	var tempMenu *numberedMenu
 
 	for {
-		tempMenu = buildMenu(&buildOps)
+		tempMenu = buildNumberedMenu(&buildOps)
 		display(tempMenu, &buildOps)
+
+		// User input
 		fmt.Println("Select an option from the menu")
 
 		_, err := fmt.Scanf("%d", &option)
@@ -164,7 +165,17 @@ func Loop() error {
 			break
 		}
 
-		//TODO: resolve choosen MenuItemer underlaying type and build another menu or run function
+		thing := buildOps.from.Children[(*tempMenu)[option]]
+		switch thing.(type) {
+
+		case *Exercise:
+			fmt.Printf("Executing runner %s\n", thing)
+			thing.(*Exercise).Runner()
+
+		case *Section:
+			fmt.Printf("Assigning a new section\n")
+			buildOps.from = *thing.(*Section)
+		}
 
 	}
 
@@ -173,8 +184,12 @@ func Loop() error {
 
 // options is used as the argument type for the get function,
 // since the from argument can be optional
-func addExitOption() {
-	topMenu.Children[exitOptionName] = &Section{MD: MetaData{Id: exitOptionName, Description: "Exit GoGym"}}
+func addExitOption(s *Section) {
+	s.Children[exitOptionName] = &Section{MD: MetaData{Id: exitOptionName, Description: "Exit GoGym"}}
+}
+
+func addBackOption(s *Section, optionNumber int) {
+	// s.Children[optionNumber] =
 }
 
 type options struct {
@@ -275,19 +290,17 @@ func display(menu *numberedMenu, options *buildOptions) {
 	}
 }
 
-func buildMenu(options *buildOptions) *numberedMenu {
+func buildNumberedMenu(options *buildOptions) *numberedMenu {
 	var temp = make(numberedMenu)
-	var navigator Section
 
 	if options.from.Children == nil {
-		navigator = topMenu
-
-	} else {
-		navigator = options.from
+		options.from = topMenu
 	}
 
+	addExitOption(&options.from)
+
 	i := 1
-	for k := range navigator.Children {
+	for k := range options.from.Children {
 		if k == exitOptionName {
 			temp[exitOptionValue] = k
 
