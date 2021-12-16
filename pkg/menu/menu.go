@@ -5,10 +5,8 @@ import (
 	"reflect"
 )
 
-// TODO: initialize to zero types. When? User defined types as well?
-// TODO: implement string method for this type
-// Offspring contains the children for a menu item
-type Offspring map[string]NameDescriptioner
+// offspring contains the children for a menu item
+type offspring map[string]nameDescriptioner
 
 // MetaData contains the minimum data for a Section or Exercise
 type MetaData struct {
@@ -19,7 +17,7 @@ type MetaData struct {
 // Section contains metadata and children bound to it
 type Section struct {
 	MD       MetaData
-	Children Offspring
+	Children offspring
 }
 
 // Exercise contains metadata and a function that implements the exercise's code
@@ -28,20 +26,20 @@ type Exercise struct {
 	Runner func(args ...interface{}) error
 }
 
-type NameDescriptioner interface {
+type nameDescriptioner interface {
 	Name() string
 	Desc() string
 }
 
-type Attacher interface {
+type attacher interface {
 	Attach(menuer MenuItemer) error
 }
 
-// TODO: Change its name
+// TODO: Change its name, it's horrible, frankly
 // MenuItemer is the interface implemented by the types MetaData, Section y Exercise
 type MenuItemer interface {
-	NameDescriptioner
-	Attacher
+	nameDescriptioner
+	attacher
 }
 
 // String returns the string representation of a MetaData
@@ -73,9 +71,9 @@ func (s *Section) Desc() string {
 }
 
 // Attach binds a MetaData, Section or Exercise to a Section
-func (s *Section) Attach(item NameDescriptioner) error {
+func (s *Section) Attach(item nameDescriptioner) error {
 	if s.Children == nil {
-		s.Children = make(Offspring)
+		s.Children = make(offspring)
 	}
 
 	name := item.Name()
@@ -105,12 +103,12 @@ func (e *Exercise) Desc() string {
 var topMenu Section
 
 // Add adds an item of name 'name' to another item of type MenuItemer
-func Add(name string, item NameDescriptioner) {
+func Add(name string, item nameDescriptioner) {
 
 	if isMenuEmpty() {
 		topMenu.MD.Id = "GoGym"
 		topMenu.MD.Description = "Exercising in Go"
-		topMenu.Children = make(Offspring)
+		topMenu.Children = make(offspring)
 	}
 
 	if _, ok := topMenu.Children[name]; ok {
@@ -156,12 +154,12 @@ func Loop() error {
 // since the from argument can be optional
 type options struct {
 	name string
-	from NameDescriptioner
+	from nameDescriptioner
 }
 
 // get is a helper that returns an element of type MenuItemer that has already been added to the menu, or error if the item is not found
-func get(options *options) (NameDescriptioner, error) {
-	var returnMenuer, fromMenuer NameDescriptioner
+func get(options *options) (nameDescriptioner, error) {
+	var returnMenuer, fromMenuer nameDescriptioner
 
 	if options.from == nil {
 		fromMenuer = &topMenu
@@ -189,7 +187,7 @@ func isMenuEmpty() bool {
 }
 
 // equal returns true if two variables of the MenuItemer interface are equal, false otherwise
-func equal(a, b NameDescriptioner) bool {
+func equal(a, b nameDescriptioner) bool {
 	if reflect.TypeOf(a) != reflect.TypeOf(b) {
 		fmt.Println("different types")
 		return false
@@ -227,7 +225,7 @@ func areSingleSectionsEqual(a, b *MetaData) bool {
 func areSectionsEqual(a, b *Section) bool {
 	return a.MD.Id == b.MD.Id &&
 		a.MD.Description == b.MD.Description
-	//TODO: Compare Offspring
+	//TODO: Compare offspring
 	// &&
 	// a.Children == b.Children
 }
