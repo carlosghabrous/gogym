@@ -19,24 +19,6 @@ func TestEmptyMenu(t *testing.T) {
 	}
 }
 
-func TestAddMetaDataToMenu(t *testing.T) {
-	MetaDataName := "section 01"
-	ss01 := &MetaData{Id: MetaDataName, Description: "section01 desc"}
-	Add(MetaDataName, ss01)
-
-	data, err := get(&Options{Name: MetaDataName})
-
-	if err != nil {
-		t.Fatalf("error getting MetaData %s, expected nil", MetaDataName)
-	}
-
-	if !equal(ss01, data) {
-		t.Fatalf("error; got %s, expected %s", data, ss01)
-	}
-
-	cleanUp(t)
-}
-
 func TestAddExerciseToMenu(t *testing.T) {
 	exerciseName := "ex01"
 	runner := func(args ...interface{}) error {
