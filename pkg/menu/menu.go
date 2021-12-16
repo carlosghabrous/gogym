@@ -43,13 +43,6 @@ type MenuItemer interface {
 	Attacher
 }
 
-// Options is used as the argument type for the get function,
-// since the From argument can be optional
-type Options struct {
-	Name string
-	From NameDescriptioner
-}
-
 // String returns the string representation of a MetaData
 func (ss *MetaData) String() string {
 	return fmt.Sprintf("<Name: %s> <Description: %s>", ss.Id, ss.Description)
@@ -63,11 +56,6 @@ func (ss *MetaData) Name() string {
 func (ss *MetaData) Desc() string {
 	return ss.Description
 }
-
-// // Attach doesn't work on SingleSections
-// func (ss *MetaData) Attach(menuer MenuItemer) error {
-// 	panic("single sections are not allowed to have children")
-// }
 
 // String returns the string representation of a Section
 func (s *Section) String() string {
@@ -112,11 +100,6 @@ func (e *Exercise) Name() string {
 func (e *Exercise) Desc() string {
 	return e.Description
 }
-
-// Attach doesn't work on Exercises
-// func (e *Exercise) Attach(menuer MenuItemer) error {
-// 	panic("exercises are not allowed to have children")
-// }
 
 var topMenu Section
 
@@ -168,15 +151,22 @@ func Loop() error {
 	return nil
 }
 
+// options is used as the argument type for the get function,
+// since the from argument can be optional
+type options struct {
+	name string
+	from NameDescriptioner
+}
+
 // get is a helper that returns an element of type MenuItemer that has already been added to the menu, or error if the item is not found
-func get(options *Options) (NameDescriptioner, error) {
+func get(options *options) (NameDescriptioner, error) {
 	var returnMenuer, fromMenuer NameDescriptioner
 
-	if options.From == nil {
+	if options.from == nil {
 		fromMenuer = &topMenu
 
 	} else {
-		fromMenuer = options.From
+		fromMenuer = options.from
 	}
 
 	fromSection, ok := fromMenuer.(*Section)
@@ -184,9 +174,9 @@ func get(options *Options) (NameDescriptioner, error) {
 		fmt.Errorf("only Section(s) contain children elements")
 	}
 
-	returnMenuer, ok = fromSection.Children[options.Name]
+	returnMenuer, ok = fromSection.Children[options.name]
 	if !ok {
-		return returnMenuer, fmt.Errorf("top menu doesn't contain item %s", options.Name)
+		return returnMenuer, fmt.Errorf("top menu doesn't contain item %s", options.name)
 	}
 
 	return returnMenuer, nil
