@@ -42,6 +42,8 @@ type MenuItemer interface {
 	attacher
 }
 
+type numberedMenu map[int]string
+
 // String returns the string representation of a MetaData
 func (ss *MetaData) String() string {
 	return fmt.Sprintf("<Name: %s> <Description: %s>", ss.Id, ss.Description)
@@ -122,7 +124,7 @@ func Add(name string, item nameDescriptioner) {
 func Loop() error {
 	var buildOps buildOptions
 	var option, min, max int
-	var tempMenu *map[int]string
+	var tempMenu *numberedMenu
 
 	for {
 		tempMenu = buildMenu(&buildOps)
@@ -235,7 +237,7 @@ type buildOptions struct {
 }
 
 // display shows the menu to the user
-func display(menu *map[int]string, options *buildOptions) {
+func display(menu *numberedMenu, options *buildOptions) {
 	var navigator Section
 
 	if options.from.Children == nil {
@@ -251,8 +253,8 @@ func display(menu *map[int]string, options *buildOptions) {
 }
 
 //TODO: Change return type to numberedMenu or similar
-func buildMenu(options *buildOptions) *map[int]string {
-	var temp = make(map[int]string)
+func buildMenu(options *buildOptions) *numberedMenu {
+	var temp = make(numberedMenu)
 	var navigator Section
 
 	if options.from.Children == nil {
@@ -273,7 +275,7 @@ func buildMenu(options *buildOptions) *map[int]string {
 	return &temp
 }
 
-func getValidRange(menu *map[int]string) (min, max int) {
+func getValidRange(menu *numberedMenu) (min, max int) {
 	size := len(*menu)
 	if size == 0 {
 		return 0, 0
