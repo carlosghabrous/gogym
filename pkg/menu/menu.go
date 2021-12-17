@@ -316,12 +316,7 @@ func display(menu *numberedMenu, options *buildOptions) {
 	}
 }
 
+// getValidRange returns the valid range for user options
 func getValidRange(menu *numberedMenu) (min, max int) {
-	size := len(*menu)
-	if size == 0 {
-		return 0, 0
-	}
-
-	return 0, size
-
+	return 0, len(*menu)
 }
