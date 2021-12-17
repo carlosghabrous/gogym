@@ -308,17 +308,18 @@ func buildNumberedMenu(options *buildOptions, prev *Section) *numberedMenu {
 
 // display shows the menu to the user
 func display(menu *numberedMenu, options *buildOptions) {
-	var name, description string
+	var name, description, formatString string
+	formatString = "-> %-10d%-20s%-20s\n"
 
 	for i := 1; i < len(*menu); i++ {
 		name = (*menu)[i]
 		description = options.from.Children[name].Desc()
-		fmt.Printf("%d.%20s%30s\n", i, name, description)
+		fmt.Printf(formatString, i, name, description)
 	}
 
 	name = (*menu)[exitOptionValue]
 	description = options.from.Children[name].Desc()
-	fmt.Printf("%d.%20s%30s\n", 0, name, description)
+	fmt.Printf(formatString, 0, name, description)
 }
 
 // getValidRange returns the valid range for user options
