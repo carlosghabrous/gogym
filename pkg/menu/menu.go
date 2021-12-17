@@ -117,12 +117,13 @@ func (o *offspring) String() string {
 	return strings.Join(result, "\n")
 }
 
+// topMenu is the variable storing the whole menu
 var topMenu Section
 
 // Add adds an item of name 'name' to another item of type MenuItemer
 func Add(name string, item nameDescriptioner) {
 
-	if isMenuEmpty() {
+	if isSectionEmpty(&topMenu) {
 		topMenu.MD.Id = "GoGym"
 		topMenu.MD.Description = "Exercising in Go"
 		topMenu.Children = make(offspring)
@@ -136,13 +137,17 @@ func Add(name string, item nameDescriptioner) {
 }
 
 // Implements the main loop for gogym
+//TODO: refactor
+// TODO: add tests for functions
+// TODO: display options in order: exit always the last one, back always the previous to last one
 func Loop() error {
 	var buildOps buildOptions
+	var previousSection Section
 	var option, min, max int
 	var tempMenu *numberedMenu
 
 	for {
-		tempMenu = buildNumberedMenu(&buildOps)
+		tempMenu = buildNumberedMenu(&buildOps, &previousSection)
 		display(tempMenu, &buildOps)
 
 		// User input
@@ -166,6 +171,8 @@ func Loop() error {
 		}
 
 		thing := buildOps.from.Children[(*tempMenu)[option]]
+		previousSection = buildOps.from
+
 		switch thing.(type) {
 
 		case *Exercise:
@@ -188,8 +195,10 @@ func addExitOption(s *Section) {
 	s.Children[exitOptionName] = &Section{MD: MetaData{Id: exitOptionName, Description: "Exit GoGym"}}
 }
 
-func addBackOption(s *Section, optionNumber int) {
-	// s.Children[optionNumber] =
+func addBackOption(s *Section, prev *Section, optionNumber int) {
+	back := &Section{MD: MetaData{Id: "Back", Description: "Back one level"}}
+	back.Attach(prev)
+	s.Children["Back"] = back
 }
 
 type options struct {
@@ -221,9 +230,9 @@ func get(options *options) (nameDescriptioner, error) {
 	return returnMenuer, nil
 }
 
-// isMenuEmpty returns true if no children have yet been attached to the topMenu variable
-func isMenuEmpty() bool {
-	return topMenu.Children == nil
+// isSectionEmpty returns true if the section has not been initialized yet
+func isSectionEmpty(s *Section) bool {
+	return s.MD == MetaData{} && s.Children == nil
 }
 
 // equal returns true if two variables of the MenuItemer interface are equal, false otherwise
@@ -274,27 +283,15 @@ type buildOptions struct {
 	from Section
 }
 
-// display shows the menu to the user
-func display(menu *numberedMenu, options *buildOptions) {
-	var navigator Section
-
-	if options.from.Children == nil {
-		navigator = topMenu
-
-	} else {
-		navigator = options.from
-	}
-
-	for k, v := range *menu {
-		fmt.Printf("%d.%20s%30s\n", k, v, navigator.Children[v].Desc())
-	}
-}
-
-func buildNumberedMenu(options *buildOptions) *numberedMenu {
+func buildNumberedMenu(options *buildOptions, prev *Section) *numberedMenu {
 	var temp = make(numberedMenu)
 
-	if options.from.Children == nil {
+	if isSectionEmpty(&options.from) {
 		options.from = topMenu
+
+	} else {
+		addBackOption(&options.from, prev, len(options.from.Children)+1)
+
 	}
 
 	addExitOption(&options.from)
@@ -311,6 +308,22 @@ func buildNumberedMenu(options *buildOptions) *numberedMenu {
 	}
 
 	return &temp
+}
+
+// display shows the menu to the user
+func display(menu *numberedMenu, options *buildOptions) {
+	var navigator Section
+
+	if options.from.Children == nil {
+		navigator = topMenu
+
+	} else {
+		navigator = options.from
+	}
+
+	for k, v := range *menu {
+		fmt.Printf("%d.%20s%30s\n", k, v, navigator.Children[v].Desc())
+	}
 }
 
 func getValidRange(menu *numberedMenu) (min, max int) {
