@@ -140,7 +140,7 @@ func Add(name string, item nameDescriptioner) {
 func Loop() error {
 	var buildOps buildOptions
 	var previousSection Section
-	var option, min, max int
+	var userOption, min, max int
 	var tempMenu *numberedMenu
 
 	for {
@@ -150,23 +150,23 @@ func Loop() error {
 		// User input
 		fmt.Println("Select an option from the menu")
 
-		_, err := fmt.Scanf("%d", &option)
+		_, err := fmt.Scanf("%d", &userOption)
 		if err != nil {
 			fmt.Println("Something went wrong! Try again!")
 			continue
 		}
 
 		min, max = getValidRange(tempMenu)
-		if option < min || option > max {
+		if userOption < min || userOption > max {
 			fmt.Printf("Option not within valid range (%d - %d). Try again!\n", min, max)
 			continue
 		}
 
-		if option == exitOptionValue {
+		if userOption == exitOptionValue {
 			break
 		}
 
-		theChosenOne := buildOps.from.Children[(*tempMenu)[option]]
+		theChosenOne := buildOps.from.Children[(*tempMenu)[userOption]]
 		previousSection = buildOps.from
 
 		switch theChosenOne := theChosenOne.(type) {
