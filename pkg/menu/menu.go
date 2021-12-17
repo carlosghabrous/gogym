@@ -137,9 +137,6 @@ func Add(name string, item nameDescriptioner) {
 }
 
 // Implements the main loop for gogym
-//TODO: refactor
-// TODO: add tests for functions
-// TODO: display options in order: exit always the last one, back always the previous to last one
 func Loop() error {
 	var buildOps buildOptions
 	var previousSection Section
@@ -311,9 +308,17 @@ func buildNumberedMenu(options *buildOptions, prev *Section) *numberedMenu {
 
 // display shows the menu to the user
 func display(menu *numberedMenu, options *buildOptions) {
-	for k, v := range *menu {
-		fmt.Printf("%d.%20s%30s\n", k, v, options.from.Children[v].Desc())
+	var name, description string
+
+	for i := 1; i < len(*menu); i++ {
+		name = (*menu)[i]
+		description = options.from.Children[name].Desc()
+		fmt.Printf("%d.%20s%30s\n", i, name, description)
 	}
+
+	name = (*menu)[exitOptionValue]
+	description = options.from.Children[name].Desc()
+	fmt.Printf("%d.%20s%30s\n", 0, name, description)
 }
 
 // getValidRange returns the valid range for user options
