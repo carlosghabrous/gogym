@@ -169,18 +169,18 @@ func Loop() error {
 			break
 		}
 
-		thing := buildOps.from.Children[(*tempMenu)[option]]
+		theChosenOne := buildOps.from.Children[(*tempMenu)[option]]
 		previousSection = buildOps.from
 
-		switch thing.(type) {
+		switch theChosenOne := theChosenOne.(type) {
 
 		case *Exercise:
-			fmt.Printf("Executing runner %s\n", thing)
-			thing.(*Exercise).Runner()
+			fmt.Printf("Executing runner %s\n", theChosenOne)
+			theChosenOne.Runner()
 
 		case *Section:
 			fmt.Printf("Assigning a new section\n")
-			buildOps.from = *thing.(*Section)
+			buildOps.from = *theChosenOne
 		}
 
 	}
