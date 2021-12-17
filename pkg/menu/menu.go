@@ -166,7 +166,6 @@ func Loop() error {
 		}
 
 		if option == exitOptionValue {
-			fmt.Println("Bye!")
 			break
 		}
 
@@ -312,17 +311,8 @@ func buildNumberedMenu(options *buildOptions, prev *Section) *numberedMenu {
 
 // display shows the menu to the user
 func display(menu *numberedMenu, options *buildOptions) {
-	var navigator Section
-
-	if options.from.Children == nil {
-		navigator = topMenu
-
-	} else {
-		navigator = options.from
-	}
-
 	for k, v := range *menu {
-		fmt.Printf("%d.%20s%30s\n", k, v, navigator.Children[v].Desc())
+		fmt.Printf("%d.%20s%30s\n", k, v, options.from.Children[v].Desc())
 	}
 }
 
