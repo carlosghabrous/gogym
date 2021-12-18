@@ -199,8 +199,9 @@ func Loop() error {
 
 // options is used as the argument type for the get function,
 // since the from argument can be optional
-func addExtraOption(s *Section, optionName, optionDescription string) {
-	s.Children[optionName] = &Section{MD: MetaData{Id: optionName, Description: optionDescription}}
+func addExtraOption(s *Section, numMenu *numberedMenu, options *menuOptionTuple) {
+	s.Children[options.name] = &Section{MD: MetaData{Id: options.name, Description: options.description}}
+	(*numMenu)[options.value] = options.name
 }
 
 type options struct {
@@ -285,6 +286,12 @@ type buildOptions struct {
 	from Section
 }
 
+type menuOptionTuple struct {
+	name        string
+	description string
+	value       int
+}
+
 func buildNumberedMenu(options *buildOptions) *numberedMenu {
 	var temp = make(numberedMenu)
 
@@ -292,23 +299,20 @@ func buildNumberedMenu(options *buildOptions) *numberedMenu {
 		options.from = topMenu
 
 	} else {
-		addExtraOption(&options.from, backOptionName, backOptionDescription)
-
+		addExtraOption(&options.from, &temp, &menuOptionTuple{backOptionName, backOptionDescription, len(options.from.Children) + 1})
 	}
-
-	addExtraOption(&options.from, exitOptionName, exitOptionDescription)
 
 	i := 1
 	for k := range options.from.Children {
-		if k == exitOptionName {
-			temp[exitOptionValue] = k
-
-		} else {
-			temp[i] = k
-			i++
+		if k == backOptionName {
+			continue
 		}
+
+		temp[i] = k
+		i++
 	}
 
+	addExtraOption(&options.from, &temp, &menuOptionTuple{exitOptionName, exitOptionDescription, exitOptionValue})
 	return &temp
 }
 
