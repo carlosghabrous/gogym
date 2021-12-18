@@ -143,37 +143,24 @@ func Add(name string, item nameDescriptioner) {
 
 // Implements the main loop for gogym
 func Loop() error {
-	var buildOps buildOptions
-	var userOption, min, max int
+	var userOption int
 	var tempMenu *numberedMenu
 	var menuStack *stack.Stack = stack.New()
 	var theChosenOne interface{}
+	var buildOps = buildOptions{from: topMenu}
 
 	for {
 		tempMenu = buildNumberedMenu(&buildOps)
+
 		display(tempMenu, &buildOps)
 
-		// User input
-		fmt.Println("Select an option from the menu")
+		userOption = getUserOption(tempMenu)
 
-		_, err := fmt.Scanf("%d", &userOption)
-		if err != nil {
-			fmt.Println("Something went wrong! Try again!")
-			continue
-		}
-
-		min, max = getValidRange(tempMenu)
-		if userOption < min || userOption > max {
-			fmt.Printf("Option not within valid range (%d - %d). Try again!\n", min, max)
-			continue
-		}
-
-		if userOption == exitOptionValue {
+		if userChoseExit(userOption, tempMenu) {
 			break
 		}
 
-		// this means user chose to go back
-		if userOption == max+1 {
+		if userChoseBack(userOption, tempMenu) {
 			theChosenOne = menuStack.Pop()
 
 		} else {
@@ -184,14 +171,11 @@ func Loop() error {
 		switch theChosenOne := theChosenOne.(type) {
 
 		case *Exercise:
-			fmt.Printf("Executing runner %s\n", theChosenOne)
 			theChosenOne.Runner()
 
 		case *Section:
-			fmt.Printf("Assigning a new section\n")
 			buildOps.from = *theChosenOne
 		}
-
 	}
 
 	return nil
@@ -295,10 +279,8 @@ type menuOptionTuple struct {
 func buildNumberedMenu(options *buildOptions) *numberedMenu {
 	var temp = make(numberedMenu)
 
-	if isSectionEmpty(&options.from) {
-		options.from = topMenu
-
-	} else {
+	// Add extra 'back' option if not in the top level menu
+	if options.from.MD.Id != topMenu.MD.Id {
 		addExtraOption(&options.from, &temp, &menuOptionTuple{backOptionName, backOptionDescription, len(options.from.Children) + 1})
 	}
 
@@ -308,6 +290,7 @@ func buildNumberedMenu(options *buildOptions) *numberedMenu {
 			continue
 		}
 
+		fmt.Printf("Adding %d - %v to the temp menu\n", i, k)
 		temp[i] = k
 		i++
 	}
@@ -327,12 +310,43 @@ func display(menu *numberedMenu, options *buildOptions) {
 		fmt.Printf(formatString, i, name, description)
 	}
 
-	name = (*menu)[exitOptionValue]
-	description = options.from.Children[name].Desc()
-	fmt.Printf(formatString, exitOptionValue, name, description)
+	fmt.Printf(formatString, exitOptionValue, exitOptionName, exitOptionDescription)
+}
+
+func getUserOption(menu *numberedMenu) int {
+	var userOption int
+
+	for {
+
+		fmt.Println("Select an option from the menu")
+
+		_, err := fmt.Scanf("%d", &userOption)
+		if err != nil {
+			fmt.Println("Something went wrong! Try again!")
+			continue
+		}
+
+		min, max := getValidRange(menu)
+		if userOption < min || userOption > max {
+			fmt.Printf("Option not within valid range (%d - %d). Try again!\n", min, max)
+			continue
+		}
+
+		break
+	}
+
+	return userOption
 }
 
 // getValidRange returns the valid range for user options
 func getValidRange(menu *numberedMenu) (min, max int) {
-	return 0, len(*menu)
+	return 0, len(*menu) - 1
+}
+
+func userChoseExit(option int, menu *numberedMenu) bool {
+	return (*menu)[option] == exitOptionName
+}
+
+func userChoseBack(option int, menu *numberedMenu) bool {
+	return (*menu)[option] == backOptionName
 }
