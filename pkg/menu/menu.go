@@ -4,11 +4,16 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/golang-collections/collections/stack"
 )
 
 const (
-	exitOptionName  = "Exit"
-	exitOptionValue = 0
+	exitOptionName        = "Exit"
+	exitOptionValue       = 0
+	exitOptionDescription = "Exit GoGym"
+	backOptionName        = "Back"
+	backOptionDescription = "Back one level"
 )
 
 // offspring contains the children for a menu item
@@ -139,12 +144,12 @@ func Add(name string, item nameDescriptioner) {
 // Implements the main loop for gogym
 func Loop() error {
 	var buildOps buildOptions
-	var previousSection Section
 	var userOption, min, max int
 	var tempMenu *numberedMenu
+	var menuStack *stack.Stack = stack.New()
 
 	for {
-		tempMenu = buildNumberedMenu(&buildOps, &previousSection)
+		tempMenu = buildNumberedMenu(&buildOps)
 		display(tempMenu, &buildOps)
 
 		// User input
@@ -166,8 +171,16 @@ func Loop() error {
 			break
 		}
 
-		theChosenOne := buildOps.from.Children[(*tempMenu)[userOption]]
-		previousSection = buildOps.from
+		var theChosenOne interface{}
+
+		// this means user chose to go back
+		if userOption == max+1 {
+			theChosenOne = menuStack.Pop()
+
+		} else {
+			theChosenOne = buildOps.from.Children[(*tempMenu)[userOption]]
+			menuStack.Push(buildOps.from)
+		}
 
 		switch theChosenOne := theChosenOne.(type) {
 
@@ -187,14 +200,8 @@ func Loop() error {
 
 // options is used as the argument type for the get function,
 // since the from argument can be optional
-func addExitOption(s *Section) {
-	s.Children[exitOptionName] = &Section{MD: MetaData{Id: exitOptionName, Description: "Exit GoGym"}}
-}
-
-func addBackOption(s *Section, prev *Section, optionNumber int) {
-	back := &Section{MD: MetaData{Id: "Back", Description: "Back one level"}}
-	back.Attach(prev)
-	s.Children["Back"] = back
+func addExtraOption(s *Section, optionName, optionDescription string) {
+	s.Children[optionName] = &Section{MD: MetaData{Id: optionName, Description: optionDescription}}
 }
 
 type options struct {
@@ -279,18 +286,18 @@ type buildOptions struct {
 	from Section
 }
 
-func buildNumberedMenu(options *buildOptions, prev *Section) *numberedMenu {
+func buildNumberedMenu(options *buildOptions) *numberedMenu {
 	var temp = make(numberedMenu)
 
 	if isSectionEmpty(&options.from) {
 		options.from = topMenu
 
 	} else {
-		addBackOption(&options.from, prev, len(options.from.Children)+1)
+		addExtraOption(&options.from, backOptionName, backOptionDescription)
 
 	}
 
-	addExitOption(&options.from)
+	addExtraOption(&options.from, exitOptionName, exitOptionDescription)
 
 	i := 1
 	for k := range options.from.Children {
