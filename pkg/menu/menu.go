@@ -147,6 +147,7 @@ func Loop() error {
 	var userOption, min, max int
 	var tempMenu *numberedMenu
 	var menuStack *stack.Stack = stack.New()
+	var theChosenOne interface{}
 
 	for {
 		tempMenu = buildNumberedMenu(&buildOps)
@@ -170,8 +171,6 @@ func Loop() error {
 		if userOption == exitOptionValue {
 			break
 		}
-
-		var theChosenOne interface{}
 
 		// this means user chose to go back
 		if userOption == max+1 {
@@ -326,7 +325,7 @@ func display(menu *numberedMenu, options *buildOptions) {
 
 	name = (*menu)[exitOptionValue]
 	description = options.from.Children[name].Desc()
-	fmt.Printf(formatString, 0, name, description)
+	fmt.Printf(formatString, exitOptionValue, name, description)
 }
 
 // getValidRange returns the valid range for user options
