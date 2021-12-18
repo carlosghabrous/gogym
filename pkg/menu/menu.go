@@ -19,6 +19,9 @@ const (
 // offspring contains the children for a menu item
 type offspring map[string]nameDescriptioner
 
+// numberedOffspring associates assings a number to each children of a section, in the order of insertion
+type numberedOffspring map[int]string
+
 // MetaData contains the minimum data for a Section or Exercise
 type MetaData struct {
 	Id          string // Item identifier
@@ -27,8 +30,10 @@ type MetaData struct {
 
 // Section contains metadata and children bound to it
 type Section struct {
-	MD       MetaData
-	Children offspring
+	MD               MetaData
+	Children         offspring
+	NumberedChildren numberedOffspring
+	NChildren        int
 }
 
 // Exercise contains metadata and a function that implements the exercise's code
@@ -53,7 +58,20 @@ type MenuItemer interface {
 	attacher
 }
 
-type numberedMenu map[int]string
+type options struct {
+	name string
+	from nameDescriptioner
+}
+
+type buildOptions struct {
+	from Section
+}
+
+type menuOptionTuple struct {
+	name        string
+	description string
+	value       int
+}
 
 // String returns the string representation of a MetaData
 func (ss *MetaData) String() string {
@@ -84,9 +102,19 @@ func (s *Section) Desc() string {
 }
 
 // Attach binds a MetaData, Section or Exercise to a Section
+//TODO: refactor this and Add (Add should call Attach)
 func (s *Section) Attach(item nameDescriptioner) error {
 	if s.Children == nil {
 		s.Children = make(offspring)
+		s.NumberedChildren = make(numberedOffspring)
+
+		addExtraOption(s, &menuOptionTuple{name: exitOptionName,
+			description: exitOptionDescription,
+			value:       exitOptionValue})
+
+		addExtraOption(s, &menuOptionTuple{name: backOptionName,
+			description: backOptionDescription,
+			value:       1})
 	}
 
 	name := item.Name()
@@ -96,12 +124,25 @@ func (s *Section) Attach(item nameDescriptioner) error {
 	}
 
 	s.Children[name] = item
+	s.NChildren++
+
+	if _, ok := s.NumberedChildren[s.NChildren]; ok {
+		if s.NumberedChildren[s.NChildren] == backOptionName {
+			s.NumberedChildren[s.NChildren+1] = backOptionName
+
+		} else {
+			return fmt.Errorf("item %s with option number %d already exists", s.NumberedChildren[s.NChildren], s.NChildren)
+		}
+	}
+
+	s.NumberedChildren[s.NChildren] = name
+
 	return nil
 }
 
 // String returns the string representation of as Exercise
 func (e *Exercise) String() string {
-	return fmt.Sprintf("%s", e.MD)
+	return fmt.Sprintf("<Name: %s> <Description: %s>", e.MD.Id, e.MD.Description)
 }
 
 // Name returns the Exercise's name
@@ -132,6 +173,11 @@ func Add(name string, item nameDescriptioner) {
 		topMenu.MD.Id = "GoGym"
 		topMenu.MD.Description = "Exercising in Go"
 		topMenu.Children = make(offspring)
+		topMenu.NumberedChildren = make(numberedOffspring)
+
+		addExtraOption(&topMenu, &menuOptionTuple{name: exitOptionName,
+			description: exitOptionDescription,
+			value:       exitOptionValue})
 	}
 
 	if _, ok := topMenu.Children[name]; ok {
@@ -139,32 +185,34 @@ func Add(name string, item nameDescriptioner) {
 	}
 
 	topMenu.Children[name] = item
+	topMenu.NChildren++
+	topMenu.NumberedChildren[topMenu.NChildren] = name
 }
 
 // Implements the main loop for gogym
 func Loop() error {
 	var userOption int
-	var tempMenu *numberedMenu
 	var menuStack *stack.Stack = stack.New()
 	var theChosenOne interface{}
 	var buildOps = buildOptions{from: topMenu}
 
 	for {
-		tempMenu = buildNumberedMenu(&buildOps)
+		fmt.Printf("from: %v\n", buildOps.from)
 
-		display(tempMenu, &buildOps)
+		display(&buildOps)
 
-		userOption = getUserOption(tempMenu)
+		userOption = getUserOption(&buildOps)
 
-		if userChoseExit(userOption, tempMenu) {
+		if userChoseExit(userOption) {
 			break
 		}
 
-		if userChoseBack(userOption, tempMenu) {
+		if userChoseBack(userOption, &buildOps) {
 			theChosenOne = menuStack.Pop()
 
 		} else {
-			theChosenOne = buildOps.from.Children[(*tempMenu)[userOption]]
+			optionName := buildOps.from.NumberedChildren[userOption]
+			theChosenOne = buildOps.from.Children[optionName]
 			menuStack.Push(buildOps.from)
 		}
 
@@ -183,14 +231,9 @@ func Loop() error {
 
 // options is used as the argument type for the get function,
 // since the from argument can be optional
-func addExtraOption(s *Section, numMenu *numberedMenu, options *menuOptionTuple) {
+func addExtraOption(s *Section, options *menuOptionTuple) {
 	s.Children[options.name] = &Section{MD: MetaData{Id: options.name, Description: options.description}}
-	(*numMenu)[options.value] = options.name
-}
-
-type options struct {
-	name string
-	from nameDescriptioner
+	s.NumberedChildren[options.value] = options.name
 }
 
 // get is a helper that returns an element of type MenuItemer that has already been added to the menu, or error if the item is not found
@@ -266,54 +309,23 @@ func areSectionsEqual(a, b *Section) bool {
 	// a.Children == b.Children
 }
 
-type buildOptions struct {
-	from Section
-}
-
-type menuOptionTuple struct {
-	name        string
-	description string
-	value       int
-}
-
-func buildNumberedMenu(options *buildOptions) *numberedMenu {
-	var temp = make(numberedMenu)
-
-	// Add extra 'back' option if not in the top level menu
-	if options.from.MD.Id != topMenu.MD.Id {
-		addExtraOption(&options.from, &temp, &menuOptionTuple{backOptionName, backOptionDescription, len(options.from.Children) + 1})
-	}
-
-	i := 1
-	for k := range options.from.Children {
-		if k == backOptionName {
-			continue
-		}
-
-		fmt.Printf("Adding %d - %v to the temp menu\n", i, k)
-		temp[i] = k
-		i++
-	}
-
-	addExtraOption(&options.from, &temp, &menuOptionTuple{exitOptionName, exitOptionDescription, exitOptionValue})
-	return &temp
-}
-
 // display shows the menu to the user
-func display(menu *numberedMenu, options *buildOptions) {
+func display(options *buildOptions) {
 	var name, description, formatString string
 	formatString = "-> %-10d%-20s%-20s\n"
 
-	for i := 1; i < len(*menu); i++ {
-		name = (*menu)[i]
+	for i := 1; i < len(options.from.NumberedChildren); i++ {
+		name = options.from.NumberedChildren[i]
 		description = options.from.Children[name].Desc()
 		fmt.Printf(formatString, i, name, description)
 	}
 
-	fmt.Printf(formatString, exitOptionValue, exitOptionName, exitOptionDescription)
+	name = options.from.NumberedChildren[exitOptionValue]
+	description = options.from.Children[name].Desc()
+	fmt.Printf(formatString, exitOptionValue, name, description)
 }
 
-func getUserOption(menu *numberedMenu) int {
+func getUserOption(options *buildOptions) int {
 	var userOption int
 
 	for {
@@ -326,7 +338,7 @@ func getUserOption(menu *numberedMenu) int {
 			continue
 		}
 
-		min, max := getValidRange(menu)
+		min, max := getValidRange(&options.from)
 		if userOption < min || userOption > max {
 			fmt.Printf("Option not within valid range (%d - %d). Try again!\n", min, max)
 			continue
@@ -339,14 +351,14 @@ func getUserOption(menu *numberedMenu) int {
 }
 
 // getValidRange returns the valid range for user options
-func getValidRange(menu *numberedMenu) (min, max int) {
-	return 0, len(*menu) - 1
+func getValidRange(s *Section) (min, max int) {
+	return 0, len(s.NumberedChildren)
 }
 
-func userChoseExit(option int, menu *numberedMenu) bool {
-	return (*menu)[option] == exitOptionName
+func userChoseExit(option int) bool {
+	return option == exitOptionValue
 }
 
-func userChoseBack(option int, menu *numberedMenu) bool {
-	return (*menu)[option] == backOptionName
+func userChoseBack(option int, options *buildOptions) bool {
+	return (options.from.NumberedChildren)[option] == backOptionName
 }

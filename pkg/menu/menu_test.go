@@ -10,6 +10,12 @@ func cleanUp(t *testing.T) {
 		for k := range topMenu.Children {
 			delete(topMenu.Children, k)
 		}
+
+		for k := range topMenu.NumberedChildren {
+			delete(topMenu.NumberedChildren, k)
+		}
+
+		topMenu.NChildren = 0
 	})
 }
 
@@ -39,6 +45,10 @@ func TestAddExerciseToMenu(t *testing.T) {
 	if !equal(ex01, data) {
 		t.Fatalf("error; got %s, expected %s", data, ex01)
 	}
+
+	if topMenu.NChildren != 1 {
+		t.Fatalf("error, got %d children, expected %d", topMenu.NChildren, 1)
+	}
 	cleanUp(t)
 }
 
@@ -54,6 +64,14 @@ func TestAddSectionToMenu(t *testing.T) {
 
 	if !equal(s01, data) {
 		t.Fatalf("error; got %s, expected %s", data, s01)
+	}
+
+	if topMenu.NChildren != 1 {
+		t.Fatalf("error; got %d children in topMenu, expected %d", topMenu.NChildren, 1)
+	}
+
+	if s01.NChildren != 0 {
+		t.Fatalf("error; got %d children, expected 0", s01.NChildren)
 	}
 	cleanUp(t)
 }
@@ -88,6 +106,10 @@ func TestAddSectionWithExerciseToMenu(t *testing.T) {
 		t.Fatalf("error; got %s, expected %s", e, exercise01)
 	}
 
+	if s01.NChildren != 1 {
+		t.Fatalf("error; got %d children, expected %d", s01.NChildren, 1)
+	}
+
 	cleanUp(t)
 }
 
@@ -113,6 +135,14 @@ func TestAddNestedSectionsWithExerciseToMenu(t *testing.T) {
 	ms, err := get(&options{name: "Main section"})
 	if err != nil {
 		t.Fatalf("section %s not in top menu (%s)", ms, err)
+	}
+
+	if ss01.NChildren != 1 {
+		t.Fatalf("error; got %d children in subsection, expected %d", s01.NChildren, 1)
+	}
+
+	if s01.NChildren != 1 {
+		t.Fatalf("error; got %d children in section, expected %d", s01.NChildren, 1)
 	}
 
 	cleanUp(t)
