@@ -63,10 +63,6 @@ type options struct {
 	from nameDescriptioner
 }
 
-type buildOptions struct {
-	from Section
-}
-
 type menuOptionTuple struct {
 	name        string
 	description string
@@ -194,26 +190,24 @@ func Loop() error {
 	var userOption int
 	var menuStack *stack.Stack = stack.New()
 	var theChosenOne interface{}
-	var buildOps = buildOptions{from: topMenu}
+	var visitingSection = topMenu
 
 	for {
-		fmt.Printf("from: %v\n", buildOps.from)
+		display(&visitingSection)
 
-		display(&buildOps)
-
-		userOption = getUserOption(&buildOps)
+		userOption = getUserOption(&visitingSection)
 
 		if userChoseExit(userOption) {
 			break
 		}
 
-		if userChoseBack(userOption, &buildOps) {
+		if userChoseBack(userOption, &visitingSection) {
 			theChosenOne = menuStack.Pop()
 
 		} else {
-			optionName := buildOps.from.NumberedChildren[userOption]
-			theChosenOne = buildOps.from.Children[optionName]
-			menuStack.Push(buildOps.from)
+			optionName := visitingSection.NumberedChildren[userOption]
+			theChosenOne = visitingSection.Children[optionName]
+			menuStack.Push(&visitingSection)
 		}
 
 		switch theChosenOne := theChosenOne.(type) {
@@ -222,7 +216,13 @@ func Loop() error {
 			theChosenOne.Runner()
 
 		case *Section:
-			buildOps.from = *theChosenOne
+			visitingSection = *theChosenOne
+			fmt.Printf("-> switch with %v\n", visitingSection.NChildren)
+			fmt.Printf("-> switch with %v\n", visitingSection.Children)
+			fmt.Printf("-> switch with %v\n", visitingSection.NumberedChildren)
+
+		default:
+			panic("wadafak!")
 		}
 	}
 
@@ -310,22 +310,25 @@ func areSectionsEqual(a, b *Section) bool {
 }
 
 // display shows the menu to the user
-func display(options *buildOptions) {
+func display(s *Section) {
 	var name, description, formatString string
 	formatString = "-> %-10d%-20s%-20s\n"
 
-	for i := 1; i < len(options.from.NumberedChildren); i++ {
-		name = options.from.NumberedChildren[i]
-		description = options.from.Children[name].Desc()
+	fmt.Printf("-> in display with :%v\n", s.Children)
+	fmt.Printf("-> in display with :%v\n", s.NChildren)
+	fmt.Printf("-> in display with :%v\n", s.NumberedChildren)
+	for i := 1; i < len(s.NumberedChildren); i++ {
+		name = s.NumberedChildren[i]
+		description = s.Children[name].Desc()
 		fmt.Printf(formatString, i, name, description)
 	}
 
-	name = options.from.NumberedChildren[exitOptionValue]
-	description = options.from.Children[name].Desc()
+	name = s.NumberedChildren[exitOptionValue]
+	description = s.Children[name].Desc()
 	fmt.Printf(formatString, exitOptionValue, name, description)
 }
 
-func getUserOption(options *buildOptions) int {
+func getUserOption(s *Section) int {
 	var userOption int
 
 	for {
@@ -338,7 +341,7 @@ func getUserOption(options *buildOptions) int {
 			continue
 		}
 
-		min, max := getValidRange(&options.from)
+		min, max := getValidRange(s)
 		if userOption < min || userOption > max {
 			fmt.Printf("Option not within valid range (%d - %d). Try again!\n", min, max)
 			continue
@@ -359,6 +362,6 @@ func userChoseExit(option int) bool {
 	return option == exitOptionValue
 }
 
-func userChoseBack(option int, options *buildOptions) bool {
-	return (options.from.NumberedChildren)[option] == backOptionName
+func userChoseBack(option int, s *Section) bool {
+	return (s.NumberedChildren)[option] == backOptionName
 }
