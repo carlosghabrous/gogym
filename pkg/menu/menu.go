@@ -207,7 +207,10 @@ func Loop() error {
 		} else {
 			optionName := visitingSection.NumberedChildren[userOption]
 			theChosenOne = visitingSection.Children[optionName]
-			menuStack.Push(visitingSection)
+
+			if _, ok := theChosenOne.(*Section); ok {
+				menuStack.Push(visitingSection)
+			}
 		}
 
 		switch theChosenOne := theChosenOne.(type) {
