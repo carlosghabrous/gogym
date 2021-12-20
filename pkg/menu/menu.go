@@ -190,24 +190,24 @@ func Loop() error {
 	var userOption int
 	var menuStack *stack.Stack = stack.New()
 	var theChosenOne interface{}
-	var visitingSection = topMenu
+	var visitingSection *Section = &topMenu
 
 	for {
-		display(&visitingSection)
+		display(visitingSection)
 
-		userOption = getUserOption(&visitingSection)
+		userOption = getUserOption(visitingSection)
 
 		if userChoseExit(userOption) {
 			break
 		}
 
-		if userChoseBack(userOption, &visitingSection) {
+		if userChoseBack(userOption, visitingSection) {
 			theChosenOne = menuStack.Pop()
 
 		} else {
 			optionName := visitingSection.NumberedChildren[userOption]
 			theChosenOne = visitingSection.Children[optionName]
-			menuStack.Push(&visitingSection)
+			menuStack.Push(visitingSection)
 		}
 
 		switch theChosenOne := theChosenOne.(type) {
@@ -216,10 +216,7 @@ func Loop() error {
 			theChosenOne.Runner()
 
 		case *Section:
-			visitingSection = *theChosenOne
-			fmt.Printf("-> switch with %v\n", visitingSection.NChildren)
-			fmt.Printf("-> switch with %v\n", visitingSection.Children)
-			fmt.Printf("-> switch with %v\n", visitingSection.NumberedChildren)
+			visitingSection = theChosenOne
 
 		default:
 			panic("wadafak!")
@@ -310,21 +307,18 @@ func areSectionsEqual(a, b *Section) bool {
 }
 
 // display shows the menu to the user
-func display(s *Section) {
+func display(section *Section) {
 	var name, description, formatString string
 	formatString = "-> %-10d%-20s%-20s\n"
 
-	fmt.Printf("-> in display with :%v\n", s.Children)
-	fmt.Printf("-> in display with :%v\n", s.NChildren)
-	fmt.Printf("-> in display with :%v\n", s.NumberedChildren)
-	for i := 1; i < len(s.NumberedChildren); i++ {
-		name = s.NumberedChildren[i]
-		description = s.Children[name].Desc()
+	for i := 1; i < len(section.NumberedChildren); i++ {
+		name = section.NumberedChildren[i]
+		description = section.Children[name].Desc()
 		fmt.Printf(formatString, i, name, description)
 	}
 
-	name = s.NumberedChildren[exitOptionValue]
-	description = s.Children[name].Desc()
+	name = section.NumberedChildren[exitOptionValue]
+	description = section.Children[name].Desc()
 	fmt.Printf(formatString, exitOptionValue, name, description)
 }
 
@@ -354,14 +348,14 @@ func getUserOption(s *Section) int {
 }
 
 // getValidRange returns the valid range for user options
-func getValidRange(s *Section) (min, max int) {
-	return 0, len(s.NumberedChildren)
+func getValidRange(section *Section) (min, max int) {
+	return 0, len(section.NumberedChildren)
 }
 
 func userChoseExit(option int) bool {
 	return option == exitOptionValue
 }
 
-func userChoseBack(option int, s *Section) bool {
-	return (s.NumberedChildren)[option] == backOptionName
+func userChoseBack(option int, section *Section) bool {
+	return (section.NumberedChildren)[option] == backOptionName
 }
