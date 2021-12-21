@@ -312,7 +312,7 @@ func areSectionsEqual(a, b *Section) bool {
 // display shows the menu to the user
 func display(section *Section) {
 	var name, description, formatString string
-	formatString = "-> %-10d%-20s%-20s\n"
+	formatString = "-> %-10d%-30s%-30s\n"
 
 	for i := 1; i < len(section.NumberedChildren); i++ {
 		name = section.NumberedChildren[i]
