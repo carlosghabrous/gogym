@@ -9,6 +9,10 @@ import (
 )
 
 func init() {
+	initBlueBook()
+}
+
+func initBlueBook() {
 	e01 := &menu.Exercise{MD: menu.MetaData{Id: "1", Description: "Chapter01, Ex01"}, Runner: bluebook.Exercise01}
 	e02 := &menu.Exercise{MD: menu.MetaData{Id: "2", Description: "Chapter01, Ex02"}, Runner: bluebook.Exercise02}
 	blue01 := &menu.Section{MD: menu.MetaData{Id: "Chapter01", Description: "Blue book's chapter 01"}}
